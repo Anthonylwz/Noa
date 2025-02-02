@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Control Semanal de Transacciones</title>
+  <style>
+    /* Estilos Generales */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 20px;
+      color: #333;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+    /* Estilos de Login */
+    #login-section {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    #user-info {
+      text-align: right;
+      margin-bottom: 10px;
+    }
+    button.login-btn, button.logout-btn {
+      padding: 8px 12px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    /* Panel de Totales */
+    #totales {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-around;
+    }
+    .total-card {
+      text-align: center;
+    }
+    /* Formulario de Transacciones */
+    form {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    form h2 {
+      margin-top: 0;
+      color: #007bff;
+    }
+    .campo {
+      margin-top: 10px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+    }
+    input[type="date"],
+    input[type="number"],
+    textarea {
+      width: calc(100% - 40px);
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+      height: 60px;
+    }
+    .voice-btn {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: #28a745;
+      color: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .tipo-container {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .tipo-btn {
+      width: 48%;
+      padding: 10px;
+      border: 1px solid #007bff;
+      background: #fff;
+      color: #007bff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .tipo-btn.active {
+      background: #007bff;
+      color: #fff;
+    }
+    .preview {
+      margin-top: 15px;
+    }
+    .preview-card {
+      border: 1px solid #ddd;
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 1.2em;
+      text-align: left;
+      margin-bottom: 15px;
+    }
+    button.submit-btn {
+      margin-top: 15px;
+      padding: 10px 15px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button.submit-btn:hover {
+      background: #0056b3;
+    }
+    /* Tabla Semanal */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      vertical-align: top;
+      text-align: center;
+    }
+    th {
+      background: #007bff;
+      color: #fff;
+    }
+    /* Estilos para transacciones */
+    .transaccion {
+      margin-bottom: 8px;
+      padding: 6px;
+      border-radius: 4px;
+      text-align: left;
+      position: relative;
+    }
+    .ingreso {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .gasto {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .delete-btn {
+      background: #dc3545;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      cursor: pointer;
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 12px;
+    }
+    /* Estilos para los íconos en las transacciones */
+    .icono {
+      font-size: 18px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    /* Botones de Exportación */
+    .export-btn {
+      padding: 8px 12px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    /* Comparación Semanal/Mensual */
+    #comparacion {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Control Semanal de Transacciones</h1>
+
+    <!-- Sección de Login -->
+    <div id="user-info"></div>
+    <div id="login-section">
+      <h2>Acceso Seguro</h2>
+      <button id="login-google" class="login-btn">Ingresar con Google</button>
+      <button id="login-email" class="login-btn">Ingresar con Email</button>
+      <!-- Formulario de Login con Email (se muestra/oculta según se requiera) -->
+      <div id="login-email-form" style="display:none;">
+        <input type="email" id="login-email-input" placeholder="Email" required>
+        <input type="password" id="login-password-input" placeholder="Contraseña" required>
+        <button id="login-email-submit" class="login-btn">Ingresar</button>
+      </div>
+      <button id="logout" class="logout-btn" style="display:none;">Cerrar Sesión</button>
+    </div>
+
+    <!-- Panel de Totales -->
+    <div id="totales">
+      <div class="total-card">
+        <h3>Ingresos</h3>
+        <p id="total-ingresos">$0.00</p>
+      </div>
+      <div class="total-card">
+        <h3>Gastos</h3>
+        <p id="total-gastos">$0.00</p>
+      </div>
+      <div class="total-card">
+        <h3>Saldo Disponible</h3>
+        <p id="saldo">$0.00</p>
+      </div>
+    </div>
+
+    <!-- Formulario para agregar transacciones -->
+    <form id="transaccion-form">
+      <h2>Agregar Transacción</h2>
+
+      <!-- Campo Fecha con botón de transcripción -->
+      <div class="campo">
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" required>
+        <button type="button" class="voice-btn" data-field="fecha" title="Transcribir Fecha">🎤</button>
+      </div>
+
+      <!-- Campo Descripción con botón de transcripción -->
+      <div class="campo">
+        <label for="descripcion">Descripción:</label>
+        <textarea id="descripcion" placeholder="Escribe o transcribe la descripción" required></textarea>
+        <button type="button" class="voice-btn" data-field="descripcion" title="Transcribir Descripción">🎤</button>
+      </div>
+
+      <!-- Campo Monto con botón de transcripción -->
+      <div class="campo">
+        <label for="monto">Monto:</label>
+        <input type="number" id="monto" step="0.01" placeholder="0.00" required>
+        <button type="button" class="voice-btn" data-field="monto" title="Transcribir Monto">🎤</button>
+      </div>
+
+      <!-- Selección de Tipo de Transacción con dos botones -->
+      <div class="campo tipo-container">
+        <button type="button" class="tipo-btn" data-tipo="ingreso">Ingreso</button>
+        <button type="button" class="tipo-btn" data-tipo="gasto">Gasto</button>
+      </div>
+      <!-- Campo oculto para almacenar el tipo seleccionado -->
+      <input type="hidden" id="tipo" value="">
+
+      <!-- Vista Previa de la Transacción -->
+      <div class="preview">
+        <h3>Vista Previa</h3>
+        <div id="preview" class="preview-card">
+          <span class="icono"></span>
+          <strong>Descripción</strong><br>
+          Fecha: <br>
+          Monto: $0.00<br>
+          Tipo:
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">Agregar Transacción</button>
+    </form>
+
+    <!-- Botones de Exportación -->
+    <div style="text-align:center; margin-bottom:20px;">
+      <button id="export-csv" class="export-btn">Exportar CSV</button>
+      <button id="export-json" class="export-btn">Exportar JSON</button>
+    </div>
+
+    <!-- Comparación Semanal/Mensual (ejemplo básico) -->
+    <div id="comparacion">
+      <h3>Comparación Semanal</h3>
+      <p id="comparacion-texto">[Aquí se mostrarán comparaciones entre la semana actual y la anterior]</p>
+    </div>
+
+    <!-- Tabla semanal: lunes a domingo -->
+    <table id="tabla-semanal">
+      <thead>
+        <tr>
+          <th>Lunes</th>
+          <th>Martes</th>
+          <th>Miércoles</th>
+          <th>Jueves</th>
+          <th>Viernes</th>
+          <th>Sábado</th>
+          <th>Domingo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <!-- Se usará la convención: 1 = lunes, 2 = martes, …, 6 = sábado y 0 = domingo -->
+          <td id="dia-1"></td>
+          <td id="dia-2"></td>
+          <td id="dia-3"></td>
+          <td id="dia-4"></td>
+          <td id="dia-5"></td>
+          <td id="dia-6"></td>
+          <td id="dia-0"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Incluir Firebase desde CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    /***********************
+     * Configuración Firebase
+     ***********************/
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_STORAGE_BUCKET",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    /***********************
+     * Variables Globales
+     ***********************/
+    let transacciones = [];
+    const presupuestoMensual = 1000; // Ejemplo de presupuesto fijo mensual para alertas
+
+    // Cargar transacciones desde localStorage
+    const transaccionesGuardadas = localStorage.getItem('transacciones');
+    if (transaccionesGuardadas) {
+      transacciones = JSON.parse(transaccionesGuardadas);
+    }
+
+    /***********************
+     * Funciones de Autenticación
+     ***********************/
+    const userInfoDiv = document.getElementById('user-info');
+    const loginSection = document.getElementById('login-section');
+    const loginGoogleBtn = document.getElementById('login-google');
+    const loginEmailBtn = document.getElementById('login-email');
+    const loginEmailForm = document.getElementById('login-email-form');
+    const loginEmailSubmit = document.getElementById('login-email-submit');
+    const logoutBtn = document.getElementById('logout');
+
+    // Login con Google
+    loginGoogleBtn.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          console.log("Ingreso con Google exitoso");
+        })
+        .catch((error) => {
+          console.error("Error en Google Login:", error);
+        });
+    });
+
+    // Mostrar formulario de login por email
+    loginEmailBtn.addEventListener('click', () => {
+      loginEmailForm.style.display = loginEmailForm.style.display === "none" ? "block" : "none";
+    });
+
+    // Login con Email/Password
+    loginEmailSubmit.addEventListener('click', () => {
+      const email = document.getElementById('login-email-input').value;
+      const password = document.getElementById('login-password-input').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          console.log("Ingreso con Email exitoso");
+        })
+        .catch((error) => {
+          console.error("Error en Email Login:", error);
+          alert("Error en el ingreso: " + error.message);
+        });
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        console.log("Sesión cerrada");
+      });
+    });
+
+    // Manejar el estado de autenticación
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        userInfoDiv.innerHTML = `Bienvenido, ${user.email}`;
+        logoutBtn.style.display = "inline-block";
+        loginGoogleBtn.style.display = "none";
+        loginEmailBtn.style.display = "none";
+        // Al iniciar sesión, se puede cargar la copia de seguridad en la nube
+        cargarDatosCloud();
+      } else {
+        userInfoDiv.innerHTML = "";
+        logoutBtn.style.display = "none";
+        loginGoogleBtn.style.display = "inline-block";
+        loginEmailBtn.style.display = "inline-block";
+      }
+    });
+
+    /***********************
+     * Respaldo en la Nube y LocalStorage Mejorado
+     ***********************/
+    // Guarda los datos en Firestore en una colección por usuario
+    function guardarDatosCloud() {
+      const user = auth.currentUser;
+      if (user) {
+        db.collection('usuarios').doc(user.uid).set({
+          transacciones: transacciones,
+          actualizado: new Date()
+        })
+        .then(() => {
+          console.log("Datos respaldados en la nube.");
+        })
+        .catch(error => {
+          console.error("Error al respaldar en la nube:", error);
+        });
+      }
+    }
+
+    // Cargar datos desde la nube si existen
+    function cargarDatosCloud() {
+      const user = auth.currentUser;
+      if (user) {
+        db.collection('usuarios').doc(user.uid).get()
+          .then(doc => {
+            if (doc.exists) {
+              transacciones = doc.data().transacciones || [];
+              actualizarLocalStorage();
+              actualizarTabla();
+              actualizarTotales();
+              actualizarComparacion();
+            }
+          })
+          .catch(error => {
+            console.error("Error al cargar datos desde la nube:", error);
+          });
+      }
+    }
+
+    // Actualizar localStorage y respaldar en la nube
+    function actualizarLocalStorage() {
+      localStorage.setItem('transacciones', JSON.stringify(transacciones));
+      guardarDatosCloud();
+    }
+
+    /***********************
+     * Funcionalidades de Transcripción por Voz
+     ***********************/
+    let recognition;
+    let currentVoiceField = null;
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+    } else if ('SpeechRecognition' in window) {
+      recognition = new SpeechRecognition();
+    } else {
+      recognition = null;
+      console.warn("Tu navegador no soporta Speech Recognition.");
+    }
+
+    if (recognition) {
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'es-ES';
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript.trim();
+        if (currentVoiceField) {
+          if (currentVoiceField.id === "monto") {
+            const num = transcript.replace(/[^0-9.]/g, '');
+            currentVoiceField.value = num;
+          } else if (currentVoiceField.id === "fecha") {
+            currentVoiceField.value = transcript;
+          } else {
+            currentVoiceField.value += transcript;
+          }
+          updatePreview();
+        }
+      };
+
+      recognition.onerror = function(event) {
+        console.error("Error de reconocimiento:", event.error);
+      };
+    }
+
+    const voiceButtons = document.querySelectorAll('.voice-btn');
+    voiceButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const fieldId = btn.getAttribute('data-field');
+        currentVoiceField = document.getElementById(fieldId);
+        if (recognition) {
+          recognition.start();
+        } else {
+          alert("Lo siento, tu navegador no soporta la transcripción de voz.");
+        }
+      });
+    });
+
+    /***********************
+     * Actualización de la Vista Previa
+     ***********************/
+    function updatePreview() {
+      const fecha = document.getElementById('fecha').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const monto = document.getElementById('monto').value;
+      const tipo = document.getElementById('tipo').value;
+      let icono = "";
+      if (tipo === "ingreso") {
+        icono = "💰";
+      } else if (tipo === "gasto") {
+        icono = "💸";
+      }
+      const previewDiv = document.getElementById('preview');
+      previewDiv.innerHTML = `<span class="icono">${icono}</span>
+                              <strong>${descripcion || "Descripción"}</strong><br>
+                              ${fecha ? "Fecha: " + fecha + "<br>" : "Fecha:<br>"}
+                              ${monto ? "Monto: $" + parseFloat(monto).toFixed(2) + "<br>" : "Monto: $0.00<br>"}
+                              Tipo: ${tipo ? (tipo.charAt(0).toUpperCase() + tipo.slice(1)) : "Tipo"}`;
+    }
+
+    document.getElementById('fecha').addEventListener('input', updatePreview);
+    document.getElementById('descripcion').addEventListener('input', updatePreview);
+    document.getElementById('monto').addEventListener('input', updatePreview);
+
+    /***********************
+     * Manejo de la Selección del Tipo
+     ***********************/
+    const tipoBtns = document.querySelectorAll('.tipo-btn');
+    const tipoHidden = document.getElementById('tipo');
+    tipoBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tipoBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        tipoHidden.value = btn.getAttribute('data-tipo');
+        updatePreview();
+      });
+    });
+
+    /***********************
+     * Manejo del Formulario de Transacciones
+     ***********************/
+    const form = document.getElementById('transaccion-form');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const fecha = document.getElementById('fecha').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const monto = parseFloat(document.getElementById('monto').value);
+      const tipo = tipoHidden.value;
+
+      if (!fecha || !descripcion || isNaN(monto) || !tipo) {
+        alert("Por favor, completa todos los campos y selecciona el tipo de transacción.");
+        return;
+      }
+
+      const transaccion = { fecha, descripcion, tipo, monto };
+      transacciones.push(transaccion);
+
+      actualizarLocalStorage();
+      form.reset();
+      tipoHidden.value = "";
+      tipoBtns.forEach(b => b.classList.remove('active'));
+      updatePreview();
+      actualizarTabla();
+      actualizarTotales();
+      actualizarComparacion();
+      verificarPresupuesto();
+    });
+
+    /***********************
+     * Actualización de la Tabla Semanal
+     ***********************/
+    function actualizarTabla() {
+      // Limpiar celdas
+      for (let i = 0; i < 7; i++) {
+        document.getElementById('dia-' + i).innerHTML = '';
+      }
+      transacciones.forEach((t, index) => {
+        const dateObj = new Date(t.fecha + "T00:00:00");
+        let diaSemana = dateObj.getDay(); // 0 = domingo, 1 = lunes, etc.
+        const icono = t.tipo === "ingreso" ? "💰" : "💸";
+        const div = document.createElement('div');
+        div.classList.add('transaccion', t.tipo);
+        div.innerHTML = `<span class="icono">${icono}</span>
+                         <strong>${t.descripcion}</strong><br>
+                         $${t.monto.toFixed(2)} 
+                         <button class="delete-btn" onclick="eliminarTransaccion(${index})">X</button>`;
+        const celda = document.getElementById('dia-' + diaSemana);
+        if (celda) {
+          celda.appendChild(div);
+        }
+      });
+    }
+
+    window.eliminarTransaccion = function(index) {
+      transacciones.splice(index, 1);
+      actualizarLocalStorage();
+      actualizarTabla();
+      actualizarTotales();
+      actualizarComparacion();
+    };
+
+    /***********************
+     * Panel de Totales
+     ***********************/
+    function actualizarTotales() {
+      let totalIngresos = 0;
+      let totalGastos = 0;
+      transacciones.forEach(t => {
+        if (t.tipo === "ingreso") {
+          totalIngresos += t.monto;
+        } else {
+          totalGastos += t.monto;
+        }
+      });
+      const saldo = totalIngresos - totalGastos;
+      document.getElementById('total-ingresos').innerText = "$" + totalIngresos.toFixed(2);
+      document.getElementById('total-gastos').innerText = "$" + totalGastos.toFixed(2);
+      document.getElementById('saldo').innerText = "$" + saldo.toFixed(2);
+    }
+
+    /***********************
+     * Comparación Semanal (Ejemplo Básico)
+     ***********************/
+    function actualizarComparacion() {
+      // Para efectos del ejemplo, se comparan los ingresos de la semana actual contra una semana ficticia anterior.
+      // En una implementación real, se debería agrupar las transacciones por semana y calcular los totales.
+      const totalActual = transacciones.reduce((acc, t) => t.tipo === "ingreso" ? acc + t.monto : acc, 0);
+      const totalAnterior = totalActual * 0.9; // Suponiendo que la semana anterior fue 10% menor
+      const diff = totalActual - totalAnterior;
+      const comparacionTexto = document.getElementById('comparacion-texto');
+      comparacionTexto.innerText = `Ingresos Semana Actual: $${totalActual.toFixed(2)} | Ingresos Semana Anterior (estimado): $${totalAnterior.toFixed(2)} | Diferencia: $${diff.toFixed(2)}`;
+    }
+
+    /***********************
+     * Exportación de Datos
+     ***********************/
+    document.getElementById('export-csv').addEventListener('click', () => {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Fecha,Descripción,Tipo,Monto\n";
+      transacciones.forEach(t => {
+        csvContent += `${t.fecha},${t.descripcion},${t.tipo},${t.monto}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "transacciones.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    document.getElementById('export-json').addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transacciones, null, 2));
+      const link = document.createElement("a");
+      link.setAttribute("href", dataStr);
+      link.setAttribute("download", "transacciones.json");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    /***********************
+     * Alerta de Presupuesto Alcanzado
+     ***********************/
+    function verificarPresupuesto() {
+      // Se suman los gastos del mes actual (este ejemplo asume que todas las transacciones son del mismo mes)
+      const gastosMes = transacciones
+        .filter(t => t.tipo === "gasto")
+        .reduce((acc, t) => acc + t.monto, 0);
+      if (gastosMes >= presupuestoMensual) {
+        alert("¡Atención! Has alcanzado o superado el presupuesto mensual establecido.");
+      }
+    }
+
+    // Inicializar al cargar la página
+    actualizarTabla();
+    actualizarTotales();
+    actualizarComparacion();
+
+    // Copia de seguridad automática cada 60 segundos (opcional)
+    setInterval(() => {
+      actualizarLocalStorage();
+    }, 60000);
+  </script>
+</body>
+</html>
