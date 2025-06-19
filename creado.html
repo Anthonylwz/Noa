@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Contact Hub v2 | Alex Martínez</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- SETUP DE VARIABLES Y TEMA --- */
+        :root {
+            --accent-gradient: linear-gradient(90deg, #58a6ff, #9370db);
+            --transition-speed: 0.5s;
+        }
+
+        [data-bs-theme="dark"] {
+            --bs-body-bg: #0d1117;
+            --bs-body-color: #c9d1d9;
+            --card-bg-color: rgba(22, 27, 34, 0.75);
+            --card-border-color: #30363d;
+            --text-secondary-custom: #8b949e;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --glass-border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-bs-theme="light"] {
+            --bs-body-bg: #f0f2f5;
+            --bs-body-color: #0d1117;
+            --card-bg-color: rgba(255, 255, 255, 0.6);
+            --card-border-color: #d0d7de;
+            --text-secondary-custom: #57606a;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --glass-border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- ESTILOS BASE Y FONDO ANIMADO --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            overflow-x: hidden;
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(45deg, #0d1117, #1a1a2e, #58a6ff, #9370db);
+            background-size: 400% 400%;
+            animation: gradient-flow 15s ease infinite;
+            transition: opacity var(--transition-speed);
+        }
+
+        [data-bs-theme="light"] .background-animation {
+            opacity: 0;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- CURSOR PERSONALIZADO --- */
+        .custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+        }
+        .custom-cursor.hovered {
+            width: 50px;
+            height: 50px;
+            opacity: 0.5;
+        }
+
+        /* --- PRELOADER --- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            background-color: #0d1117;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #preloader.loaded {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #30363d;
+            border-top: 5px solid #58a6ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            transition: background-color 0.4s ease;
+        }
+        .navbar.scrolled {
+            background-color: var(--card-bg-color);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border-color);
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #58a6ff !important;
+        }
+        .theme-toggle { cursor: pointer; font-size: 1.2rem; color: var(--text-secondary-custom); }
+        
+        /* --- HEADER --- */
+        .header { min-height: 100vh; display: flex; align-items: center; text-align: center; }
+        .header h1 { font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .header p { font-size: 1.25rem; color: var(--text-secondary-custom); max-width: 650px; margin: 0 auto; }
+
+        /* --- SECCIONES Y TÍTULOS --- */
+        .section { padding: 6rem 0; }
+        .section-title { text-align: center; font-size: 2.8rem; font-weight: 700; margin-bottom: 5rem; position: relative; }
+        .section-title::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 100px; height: 5px; border-radius: 2.5px; background: var(--accent-gradient); }
+        
+        /* --- TARJETAS GENERALES (Glassmorphism) --- */
+        .glass-card { background-color: var(--card-bg-color); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--glass-border-color); box-shadow: 0 10px 30px var(--shadow-color); transition: border-color 0.3s ease; }
+
+        /* --- PERFIL Y HABILIDADES --- */
+        .progress { height: 10px; background-color: var(--card-border-color); }
+        .progress-bar { background: var(--accent-gradient); }
+
+        /* --- NUEVAS TARJETAS SOCIALES AVANZADAS --- */
+        .social-card {
+            text-decoration: none;
+            color: var(--bs-body-color);
+            padding: 2.5rem;
+            transform-style: preserve-3d; /* Clave para el efecto 3D */
+            transition: box-shadow 0.4s ease;
+        }
+        .social-card-inner {
+            transform: translateZ(20px); /* Eleva el contenido dentro de la tarjeta */
+        }
+        .social-card:hover {
+            box-shadow: 0 25px 50px var(--shadow-color);
+        }
+
+        .social-card .social-icon {
+            font-size: 3.5rem;
+            height: 90px;
+            width: 90px;
+            line-height: 90px;
+            border-radius: 50%;
+            color: #fff;
+            margin: 0 auto 1.5rem;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .social-card h3 { font-size: 1.8rem; margin-bottom: 0.5rem; transition: transform 0.3s ease; }
+        .social-card p { color: var(--text-secondary-custom); line-height: 1.6; transition: opacity 0.3s ease; }
+        
+        .action-btn {
+            display: inline-block;
+            background: var(--accent-gradient);
+            color: #fff;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+        }
+        
+        /* Efectos de hover orquestados */
+        .social-card:hover .social-icon {
+            transform: scale(1.15);
+        }
+        .social-card:hover p {
+            opacity: 0;
+        }
+        .social-card:hover .action-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Colores y estilos específicos por red */
+        .facebook .social-icon { background: #1877f2; }
+        .facebook:hover { border-color: #1877f2; }
+
+        .whatsapp .social-icon { background: #25D366; }
+        .whatsapp:hover { border-color: #25D366; }
+        
+        .tiktok .social-icon { background: #010101; }
+        .tiktok:hover { border: 1px solid transparent; background-image: linear-gradient(var(--card-bg-color), var(--card-bg-color)), linear-gradient(135deg, #00f2ea, #ff0050); background-origin: border-box; background-clip: content-box, border-box; }
+
+        .x-twitter .social-icon { background: #000; }
+        .x-twitter:hover { border-color: #ccc; }
+
+    </style>
+</head>
+<body>
+    <div id="preloader"><div class="spinner"></div></div>
+    <div class="custom-cursor"></div>
+    <div class="background-animation"></div>
+
+    <nav id="mainNav" class="navbar navbar-expand-lg fixed-top navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Alex A F P</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="#about">Sobre Mí</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#connect">Conectar</a></li>
+                    <li class="nav-item ms-lg-3 d-flex align-items-center"><i class="fas fa-moon theme-toggle" id="themeToggle" title="Cambiar tema"></i></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="header">
+        <div class="container text-center">
+            <h1 class="header-title">Social Contact </h1>
+            <p class="header-subtitle">Conéctate conmigo. Soy un desarrollador y diseñador apasionado por crear experiencias digitales únicas y funcionales.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="about" class="section">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-5">
+                    <div class="card profile-card glass-card h-100">
+                        <div class="card-body p-4 p-md-5">
+                            <h2>Alex A F P</h2>
+                            <p class="location mb-2"><i class="fas fa-map-marker-alt me-2"></i> peru</p>
+                            <p class="email mb-4"><i class="fas fa-envelope me-2"></i> p6193130@gmail.com</p>
+                            <div class="skills-chart">
+                                <div class="skill-bar mb-3">
+                                    <div class="skill-info d-flex justify-content-between mb-1"><span>JavaScript / React</span><span>%</span></div>
+                                    <div class="progress" role="progressbar" aria-valuenow="95"><div class="progress-bar" data-width="95"></div></div>
+                                </div>
+                                <div class="skill-bar mb-3">
+                                    <div class="skill-info d-flex justify-content-between mb-1"><span>Node.js / Backend</span><span>%</span></div>
+                                    <div class="progress" role="progressbar" aria-valuenow="85"><div class="progress-bar" data-width="85"></div></div>
+                                </div>
+                                <div class="skill-bar">
+                                    <div class="skill-info d-flex justify-content-between mb-1"><span>UI/UX Design</span><span>%</span></div>
+                                    <div class="progress" role="progressbar" aria-valuenow="90"><div class="progress-bar" data-width="90"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="about-me">
+                        <h3 style="font-size: 2rem; font-weight: 600; margin-bottom: 1.5rem;">Sobre Mí</h3>
+                        <p>Desarrollador Full Stack con más de 2 años de experiencia. Mi pasión es combinar un código limpio y eficiente con un diseño intuitivo para construir productos que los usuarios amen.</p>
+                        <p>Cuando no estoy programando, disfruto de la fotografía, viajar y explorar nuevas culturas. Busco constantemente nuevos retos para seguir creciendo profesionalmente.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="connect" class="section">
+            <h2 class="section-title">Conéctate Conmigo</h2>
+            <div class="row g-5">
+                <div class="col-lg-6 col-md-6">
+                    <a href="https://www.facebook.com/profile.php?id=100092504121960" target="_blank" class="card social-card glass-card h-100 facebook" data-tilt-card>
+                        <div class="card-body text-center social-card-inner">
+                            <div class="social-icon"><i class="fab fa-facebook-f"></i></div>
+                            <h3>Facebook</h3>
+                            <p>Sígueme para .</p>
+                            <span class="action-btn">Ver Perfil</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <a href="https://wa.me/51902871820" target="_blank" class="card social-card glass-card h-100 whatsapp" data-tilt-card>
+                        <div class="card-body text-center social-card-inner">
+                            <div class="social-icon"><i class="fab fa-whatsapp"></i></div>
+                            <h3>WhatsApp</h3>
+                            <p>Contáctame para consultas rápidas.</p>
+                             <span class="action-btn">Chatear Ahora</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <a href="https://www.tiktok.com/@alex_2044_13?lang=es" target="_blank" class="card social-card glass-card h-100 tiktok" data-tilt-card>
+                        <div class="card-body text-center social-card-inner">
+                            <div class="social-icon"><i class="fab fa-tiktok"></i></div>
+                            <h3>TikTok</h3>
+                            <p>No te pierdas mis videos y contenido creativo.</p>
+                            <span class="action-btn">Seguir</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <a href="https://www.x.com" target="_blank" class="card social-card glass-card h-100 x-twitter" data-tilt-card>
+                        <div class="card-body text-center social-card-inner">
+                            <div class="social-icon"><i class="fa-brands fa-x-twitter"></i></div>
+                            <h3>X (Twitter)</h3>
+                            <p>Mis pensamientos e interacciones en tiempo real.</p>
+                            <span class="action-btn">Seguir</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <p>&copy; 2025 Alex A F P </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- PRELOADER ---
+        const preloader = document.getElementById('preloader');
+        window.addEventListener('load', () => { preloader.classList.add('loaded'); });
+
+        // --- LÓGICA DEL CAMBIO DE TEMA CON BOOTSTRAP ---
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlEl = document.documentElement;
+        const applyTheme = (theme) => {
+            htmlEl.setAttribute('data-bs-theme', theme);
+            themeToggle.className = theme === 'light' ? 'fas fa-sun theme-toggle' : 'fas fa-moon theme-toggle';
+            localStorage.setItem('theme', theme);
+        };
+        applyTheme(localStorage.getItem('theme') || 'dark');
+        themeToggle.addEventListener('click', () => {
+            const newTheme = htmlEl.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+        });
+
+        // --- NAVBAR SCROLL Y ACTIVE LINK ---
+        const mainNav = document.getElementById('mainNav');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section[id]');
+        window.addEventListener('scroll', () => {
+            mainNav.classList.toggle('scrolled', window.scrollY > 50);
+            let current = '';
+            sections.forEach(section => {
+                if (scrollY >= section.offsetTop - 150) current = section.id;
+            });
+            navLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href').includes(current));
+            });
+        });
+
+        // --- ANIMACIONES GSAP GENERALES ---
+        const headerTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        headerTl.from('.header-title', { opacity: 0, y: 40, duration: 1 })
+                .from('.header-subtitle', { opacity: 0, y: 20, duration: 0.8 }, '-=0.5');
+
+        gsap.utils.toArray('.section-title, .about-me, .profile-card').forEach(el => {
+            gsap.from(el, { opacity: 0, y: 60, duration: 1, scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' } });
+        });
+        
+        // Stagger para tarjetas sociales
+        gsap.from(".social-card", { scrollTrigger: { trigger: "#connect", start: "top 80%" }, y: 50, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.15 });
+
+        const skillBars = document.querySelectorAll('.progress-bar');
+        skillBars.forEach(bar => {
+            gsap.to(bar, { width: `${bar.dataset.width}%`, duration: 1.8, ease: 'power4.out', scrollTrigger: { trigger: bar.closest('.skills-chart'), start: 'top 80%', toggleActions: 'play none none none' } });
+        });
+        
+        // --- CURSOR PERSONALIZADO ---
+        const cursor = document.querySelector('.custom-cursor');
+        const interactiveElements = document.querySelectorAll('a, button, .theme-toggle');
+        window.addEventListener('mousemove', e => { gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.2, ease: 'power2.out' }); });
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // --- LÓGICA AVANZADA PARA TARJETAS SOCIALES 3D TILT ---
+        const tiltCards = document.querySelectorAll('[data-tilt-card]');
+        tiltCards.forEach(card => {
+            const height = card.clientHeight;
+            const width = card.clientWidth;
+
+            card.addEventListener('mousemove', (e) => {
+                const xVal = e.layerX;
+                const yVal = e.layerY;
+                const yRotation = 20 * ((xVal - width / 2) / width);
+                const xRotation = -20 * ((yVal - height / 2) / height);
+
+                gsap.to(card, {
+                    duration: 0.5,
+                    rotationX: xRotation,
+                    rotationY: yRotation,
+                    ease: 'power2.out',
+                    transformPerspective: 1000
+                });
+            });
+
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    duration: 1,
+                    rotationX: 0,
+                    rotationY: 0,
+                    ease: 'elastic.out(1, 0.3)'
+                });
+            });
+        });
+    });
+    </script>
+</body>
+</html>
